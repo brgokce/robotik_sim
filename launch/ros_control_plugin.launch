@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="model" default="$(find robotik_sim)/urdf/robot.xml"/>
+  <arg name="rvizconfig" default="$(find robotik_sim)/rviz/urdf.rviz" />
+
+  <include file="$(find robotik_sim)/launch/gazebo.launch">
+    <arg name="model" value="$(arg model)" />
+  </include>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
+
+  <rosparam command="load"
+            file="$(find robotik_sim)/config/joints.yaml" ns="robot_joint_state_controller" />
+  <rosparam command="load"
+            file="$(find robotik_sim)/config/diffdrive.yaml" ns="robot_diff_drive_controller" />
+
+  <node name="robot_controller" pkg="controller_manager" type="spawner"
+    args="robot_joint_state_controller robot_diff_drive_controller --shutdown-timeout 3"/>
+
+  <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
+    <param name="default_topic" value="/robot_diff_drive_controller/cmd_vel"/>
+  </node>
+</launch>
